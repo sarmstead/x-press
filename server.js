@@ -1,9 +1,6 @@
 const express = require('express');
 const app = express();
 
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const errorHandler = require('errorhandler');
-const morgan = require('morgan');
+app.use(require('./middleware'));
 
 const PORT = process.env.PORT || 3000;
