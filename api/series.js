@@ -1,4 +1,3 @@
-const e = require('express');
 const express = require('express');
 const seriesRouter = express.Router();
 const sqlite3 = require('sqlite3');
