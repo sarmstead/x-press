@@ -19,7 +19,7 @@ app.use(morgan('dev'));
 app.use('/api', apiRouter);
 
 // Create PORT
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // Start server
 app.listen(PORT, () => {
