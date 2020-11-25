@@ -106,6 +106,19 @@ issuesRouter.put('/:issueId', (req, res, next) => {
             });
         }
     })
-})
+});
+
+issuesRouter.delete('/:issueId', (req, res, next) => {
+    const sql = 'DELETE FROM Issue WHERE Issue.id = $issueId';
+    const values = {
+        $issueId: req.params.issueId
+    };
+    db.run(sql, values, (err) => {
+        if (err) {
+            next(err);
+        }
+        res.sendStatus(204);
+    })
+});
 
 module.exports = issuesRouter;
