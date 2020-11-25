@@ -41,7 +41,7 @@ issuesRouter.post('/', (req, res, next) => {
     const artistSql = 'SELECT * FROM Artist WHERE Artist.id = $artistId';
     const artistValues = {
         $artistId: artistId
-    }
+    };
 
     db.get(artistSql, artistValues, (err, artist) => {
         if (err) {
@@ -68,10 +68,44 @@ issuesRouter.post('/', (req, res, next) => {
             });
         }
     });
-
-    
-
-   
 });
+
+issuesRouter.put('/:issueId', (req, res, next) => {
+    const name = req.body.issue.name;
+    const issueNumber = req.body.issue.issueNumber;
+    const publicationDate = req.body.issue.publicationDate;
+    const artistId = req.body.issue.artistId;
+    const artistSql = 'SELECT * FROM Artist WHERE Artist.id = $artistId';
+    const artistValues = {
+        $artistId: artistId
+    };
+    db.get(artistSql, artistValues, (err, artist) => {
+        if (err) {
+            next(err);
+        } else {
+            if (!name || !issueNumber || !publicationDate || !artistId) {
+                return res.sendStatus(400);
+            }
+            const issueSql = 'UPDATE Issue SET name = $name, issue_number = $issueNumber, publication_date = $publicationDate, artist_id = $artistId WHERE Issue.id = $issueId';
+            const issueValues = {
+                $name: name,
+                $issueNumber: issueNumber,
+                $publicationDate: publicationDate,
+                $artistId: artistId,
+                $issueId: req.params.issueId
+            };
+
+            db.run(issueSql, issueValues, function(err) {
+                if(err) {
+                    next(err);
+                } else {
+                    db.get(`SELECT * FROM Issue WHERE Issue.id =  ${req.params.issueId}`, (err2, issue) => {
+                        res.status(200).json({issue: issue});
+                    });
+                }
+            });
+        }
+    })
+})
 
 module.exports = issuesRouter;
