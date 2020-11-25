@@ -35,4 +35,27 @@ seriesRouter.get('/:seriesId', (req, res, next) => {
     res.status(200).json({series: req.series});
 });
 
+seriesRouter.post('/', (req, res, next) => {
+    const name = req.body.series.name;
+    const description = req.body.series.description;
+    if (!name || !description) {
+        res.sendStatus(400);
+    }
+
+    const sql = 'INSERT INTO Series (name, description) VALUES ($name, $description)';
+    const values = {
+        $name: name,
+        $description: description
+    }
+    db.run(sql, values, function(err) {
+        if (err) {
+            next(err);
+        }
+        db.get(`SELECT * FROM Series WHERE Series.id = ${this.lastID}`, (err2, series) => {
+            res.status(201).json({series: series});
+        });
+    });
+
+});
+
 module.exports = seriesRouter;
