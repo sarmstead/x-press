@@ -3,7 +3,7 @@ const issuesRouter = express.Router({ mergeParams: true });
 const sqlite3 = require('sqlite3');
 db = new sqlite3.Database(process.env.TEST_DATABASE || './database.sqlite');
 
-issuesRouter.param('issueId', (req, res, next, issuesId) => {
+issuesRouter.param('issueId', (req, res, next, issueId) => {
     const sql = 'SELECT * FROM Issue WHERE Issue.id = $issueId';
     const values = {
         $issueId: issueId
@@ -14,7 +14,7 @@ issuesRouter.param('issueId', (req, res, next, issuesId) => {
         } else if (issue) {
             next();
         } else {
-            res.sendStatus(400);
+            res.sendStatus(404);
         }
     });
 });
@@ -79,13 +79,14 @@ issuesRouter.put('/:issueId', (req, res, next) => {
     const artistValues = {
         $artistId: artistId
     };
+
     db.get(artistSql, artistValues, (err, artist) => {
         if (err) {
+            res.sendStatus(400);
             next(err);
+        } else if (!name || !issueNumber || !publicationDate || !artistId) {
+            return res.sendStatus(400);
         } else {
-            if (!name || !issueNumber || !publicationDate || !artistId) {
-                return res.sendStatus(400);
-            }
             const issueSql = 'UPDATE Issue SET name = $name, issue_number = $issueNumber, publication_date = $publicationDate, artist_id = $artistId WHERE Issue.id = $issueId';
             const issueValues = {
                 $name: name,
@@ -100,6 +101,9 @@ issuesRouter.put('/:issueId', (req, res, next) => {
                     next(err);
                 } else {
                     db.get(`SELECT * FROM Issue WHERE Issue.id =  ${req.params.issueId}`, (err2, issue) => {
+                        if (err2) {
+                            return res.sendStatus(404);
+                        }
                         res.status(200).json({issue: issue});
                     });
                 }
@@ -118,7 +122,7 @@ issuesRouter.delete('/:issueId', (req, res, next) => {
             next(err);
         }
         res.sendStatus(204);
-    })
+    });
 });
 
 module.exports = issuesRouter;
